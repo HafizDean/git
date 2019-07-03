@@ -13,7 +13,23 @@
 #	include <locale.h>
 #	include <libintl.h>
 #	ifdef GIT_WINDOWS_NATIVE
-#		define locale_charset() "UTF-8"
+
+static const char *locale_charset(void)
+{
+	const char *env = getenv("LC_ALL"), *dot;
+
+	if (!env || !*env)
+		env = getenv("LC_CTYPE");
+	if (!env || !*env)
+		env = getenv("LANG");
+
+	if (!env)
+		return "UTF-8";
+
+	dot = strchr(env, '.');
+	return !dot ? env : dot + 1;
+}
+
 #	elif defined HAVE_LIBCHARSET_H
 #		include <libcharset.h>
 #	else
